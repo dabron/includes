@@ -15,7 +15,7 @@ function browseridInit(callback, authorized, audience)
 function browseridCreateButton()
 {
 	var img = document.createElement('img');
-	img.src = 'common/browserid.png';
+	img.src = 'includes/browserid.png';
 	img.alt = 'Sign in';
 
 	var a = document.createElement('a');
@@ -36,7 +36,7 @@ function browseridAssertion(assertion)
 	if (assertion !== null)
 	{
 		var data = 'authorized=' + _authorized + '&audience=' + _audience + '&assertion=' + assertion;
-		createAsync('common/browserid.php', data, function(x)
+		createAsync('includes/browserid.php', data, function(x)
 		{
 			_callback(JSON.parse(x));
 		});
