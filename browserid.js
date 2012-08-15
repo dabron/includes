@@ -9,7 +9,7 @@ function browseridInit(callback, authorized, audience)
 	_callback = callback;
 	_authorized = authorized;
 	_audience = audience;
-	loadScript('https://browserid.org/include.js');
+	loadScript('https://login.persona.org/include.js');
 }
 
 function browseridCreateButton()
@@ -24,7 +24,7 @@ function browseridCreateButton()
 	a.appendChild(img);
 	a.onclick = function()
 	{
-		navigator.id.get(browseridAssertion, {allowPersistent: true});
+		navigator.id.get(browseridAssertion);
 		return false;
 	};
 

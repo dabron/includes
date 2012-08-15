@@ -3,48 +3,38 @@
 require $_POST['authorized'];
 
 $valid = false;
-$url = 'https://browserid.org/verify';
-$data = http_build_query
+$url = 'https://verifier.login.persona.org/verify';
+$assertion = $_POST['assertion'];
+$audience = urlencode($_POST['audience']);
+$params = "assertion=$assertion&audience=$audience";
+$ch = curl_init();
+
+$options = array
 (
-	array
-	(
-		'audience' => urlencode($_POST['audience']),
-		'assertion' => $_POST['assertion']
-	)
+	CURLOPT_URL => $url,
+	CURLOPT_RETURNTRANSFER => true,
+	CURLOPT_POST => 2,
+	CURLOPT_POSTFIELDS => $params
 );
 
-$params = array
-(
-	'http' => array
-	(
-		'method' => 'POST',
-		'header' => 'Content-Type: application/x-www-form-urlencoded',
-		'content' => $data
-	)
-);
+curl_setopt_array($ch, $options);
+$result = curl_exec($ch);
+$json = json_decode($result);
 
-$ctx = stream_context_create($params);
-$fp = fopen($url, 'rb', false, $ctx);
-
-if ($fp)
+if ($json->status == 'okay')
 {
-	$json = json_decode(stream_get_contents($fp));
+	$email = $json->email;
+	$userid = authorize($email);
 
-	if ($json->status == 'okay')
+	if ($userid > 0)
 	{
-		$email = $json->email;
-		$userid = authorize($email);
-
-		if ($userid > 0)
-		{
-			$valid = true;
-			$json->userid = $userid;
-			$json->authorized = true;
-		}
-		else
-		{
-			$json->authorized = false;
-		}
+		$valid = true;
+		$json->userid = $userid;
+		$json->authorized = true;
+	}
+	else
+	{
+		$json->authorized = false;
 	}
 }
 
@@ -54,5 +44,3 @@ if (!$valid)
 }
 
 echo json_encode($json);
-
-?>
